@@ -12,7 +12,7 @@ public record RegisterRequest(
 
 
         @NotBlank(message = "Il cognome è obbligatorio")
-        @Pattern(regexp =  "^[A-Z][a-z]+$", message = "Il cognome deve iniziare con la lettera maiuscola")
+        @Pattern(regexp =  "^[A-Z][a-zA-Z ]+$", message = "Il cognome deve iniziare con la lettera maiuscola")
         String lastName,
 
         @NotBlank(message = "Lo username è obbligatorio")

@@ -73,9 +73,10 @@ async function register() {
             alert("Registrazione completata!");
             window.location.href = "login.html";
         } else {
+            const errorText = await response.text();
 
-            if (response.status === 400) {
-                alert("Username già esistente!");
+            if (errorText) {
+                alert(errorText);
             } else {
                 alert("Errore durante la registrazione");
             }
