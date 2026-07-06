@@ -11,10 +11,16 @@ function validatePlaylist(playlist) {
     }
 
     // Protezione da caratteri inutili
-    const validPattern = /[a-zA-Z0-9àèìòùÀÈÌÒÙáéíóúÁÉÍÓÚ]/;
-    if (!validPattern.test(playlist.title) || !validPattern.test(playlist.category)) {
-        alert("I campi devono contenere un nome reale (almeno una lettera o un numero)");
-        return false;
+    const validPattern = /^[a-zA-ZàèìòùÀÈÌÒÙáéíóúÁÉÍÓÚ ]+$/;
+
+    if(!validPattern.test(playlist.title)) {
+       alert("Il titolo può contenere solo lettere e spazi");
+       return false;
+    }
+
+    if(!validPattern.test(playlist.category)) {
+       alert("La categoria può contenere solo lettere e spazi");
+       return false;
     }
 
 

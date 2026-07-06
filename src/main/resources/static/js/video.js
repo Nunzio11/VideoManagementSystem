@@ -9,10 +9,46 @@ let isPlaylistOwner = false;
 initPage();
 
 async function initPage() {
-await loadPlaylist();
-await loadVideos();
-
+    await loadPlaylist();
+    await loadVideos();
 }
+
+function validateVideo(video) {
+    if (!video.title || video.title.trim().length === 0) {
+        alert("Il titolo del video non può essere vuoto");
+        return false;
+    }
+
+    // BLOCCA NUMERI E CARATT. SPECIALI
+    const validPattern = /^[a-zA-ZàèìòùÀÈÌÒÙáéíóúÁÉÍÓÚ ]+$/;
+    if (!validPattern.test(video.title)) {
+        alert("Il titolo del video può contenere solo lettere e spazi");
+        return false;
+    }
+
+    if (video.title.trim().length < 7 || video.title.trim().length > 255) {
+            alert("Il titolo deve contenere tra i 7 e i 255 caratteri");
+            return false;
+    }
+
+    if (isNaN(video.durationMinutes) || video.durationMinutes < 1) {
+        alert("La durata deve essere almeno di 1 minuto");
+        return false;
+    }
+
+    if (video.durationMinutes > 240) {
+            alert("La durata non può superare le 4 ore (240 minuti)");
+            return false;
+    }
+
+    const validLevels = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
+    if (!validLevels.includes(video.level)) {
+        alert("Il livello selezionato non è valido!");
+        return false;
+    }
+
+    return true;
+ }
 
 async function loadPlaylist() {
 
@@ -105,9 +141,14 @@ async function saveVideo() {
         username: loggedUser
     };
 
-    try {
-        await createVideo(playlistId, video, loggedUser);
+    if (!validateVideo(video)) {
+        return;
+    }
 
+    try {
+        video.title = video.title.trim();
+
+        await createVideo(playlistId, video, loggedUser);
         showSuccess("Video creato con successo");
         closeModal("insertVideoModal");
         clearInputs( "video-title", "video-duration");
@@ -148,7 +189,12 @@ async function saveVideoUpdate() {
         username: sessionStorage.getItem("loggedUser")
     };
 
+    if(!validateVideo(video)) {
+       return;
+    }
+
     try {
+        video.title = video.title.trim();
 
         await updateVideoService(selectedVideoId, video);
         showSuccess("Video aggiornato");

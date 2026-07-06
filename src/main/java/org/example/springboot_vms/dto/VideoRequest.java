@@ -5,6 +5,8 @@ import jakarta.validation.constraints.*;
 public record VideoRequest(
         @NotBlank(message = "Il titolo è obbligatorio")
         @Size(min = 7, max = 255, message = "Il titolo deve contenere tra 7 e 255 caratteri")
+        @Pattern(regexp = "^[a-zA-ZàèìòùÀÈÌÒÙáéíóúÁÉÍÓÚ ]+$",
+        message = "Il titolo del video può contenere solo lettere e spazi")
         String title,
 
 
