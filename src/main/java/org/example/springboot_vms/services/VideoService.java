@@ -62,6 +62,7 @@ public class VideoService {
         video.setTitle(request.title());
         video.setDurationMinutes(request.durationMinutes());
         video.setLevel(request.level());
+        video.setVideoUrl(request.videoUrl());
 
         Video saveVideo = videoRepository.save(video);
         return VideoMapper.toVideoResponse(saveVideo);
