@@ -24,26 +24,30 @@ public class Video {
     @JoinColumn(name = "playlistRIF", nullable = false)
     private Playlist playlist;
 
+    @Column(name = "video_url", nullable = false)
+    private String videoUrl;
+
     public Video() {
 
     }
 
-    public Video(Long id, String title, Integer durationMinutes, String level, Playlist playlist) {
+    public Video(Long id, String title, Integer durationMinutes, String level, Playlist playlist, String videoUrl) {
         super();
         this.id = id;
         this.title = title;
         this.durationMinutes = durationMinutes;
         this.level = level;
         this.playlist = playlist;
+        this.videoUrl = videoUrl;
     }
 
-    public Video(String title, Integer durationMinutes, String level, Playlist playlist) {
+    public Video(String title, Integer durationMinutes, String level, Playlist playlist, String videoUrl) {
         super();
         this.title = title;
         this.durationMinutes = durationMinutes;
         this.level = level;
         this.playlist = playlist;
-
+        this.videoUrl = videoUrl;
     }
 
     public Long getId() {
@@ -84,5 +88,13 @@ public class Video {
 
     public void setPlaylist(Playlist playlist) {
         this.playlist = playlist;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 }

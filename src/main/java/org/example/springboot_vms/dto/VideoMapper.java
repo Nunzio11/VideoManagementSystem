@@ -13,7 +13,8 @@ public class VideoMapper {
                 video.getId(),
                 video.getTitle(),
                 video.getDurationMinutes(),
-                video.getLevel()
+                video.getLevel(),
+                video.getVideoUrl()
         );
     }
 }

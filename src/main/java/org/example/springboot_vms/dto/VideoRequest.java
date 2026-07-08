@@ -18,7 +18,12 @@ public record VideoRequest(
         String level,
 
         @NotBlank(message = "Utente obbligatorio")
-        String username
+        String username,
+
+        @NotBlank(message = "L'URL del video è obbligatorio")
+        @Pattern(regexp = "^(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})([/\\w .-]*)*/?.*$",
+                message = "Inserisci un URL valido (es. https://...)")
+        String videoUrl
 
 ) {
 };
