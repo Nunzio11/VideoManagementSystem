@@ -86,6 +86,7 @@ public class PlaylistService {
         v.setDurationMinutes(request.durationMinutes());
         v.setLevel(request.level());
         v.setPlaylist(playlist);
+        v.setVideoUrl(request.videoUrl());
 
         Video saved = videoRepository.save(v);
 

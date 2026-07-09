@@ -4,11 +4,10 @@ import jakarta.validation.constraints.*;
 
 public record VideoRequest(
         @NotBlank(message = "Il titolo è obbligatorio")
-        @Size(min = 7, max = 255, message = "Il titolo deve contenere tra 7 e 255 caratteri")
-        @Pattern(regexp = "^[a-zA-ZàèìòùÀÈÌÒÙáéíóúÁÉÍÓÚ ]+$",
-        message = "Il titolo del video può contenere solo lettere e spazi")
+        @Size(min = 6, max = 255, message = "Il titolo deve contenere tra 6 e 255 caratteri") // Portato a min 6 come React
+        @Pattern(regexp = "^[a-zA-Z0-9àèìòùÀÈÌÒÙáéíóúÁÉÍÓÚ][a-zA-Z0-9àèìòùÀÈÌÒÙáéíóúÁÉÍÓÚ\\s\\-_.,!?()']*$",
+                message = "Il titolo contiene caratteri non validi")
         String title,
-
 
         @Min(value = 1, message = "La durata deve essere maggiore di 0")
         @Max(value = 14400, message = "La durata non può superare i 14400 secondi")
@@ -26,6 +25,4 @@ public record VideoRequest(
         @Pattern(regexp = "^(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})([/\\w .-]*)*/?.*$",
                 message = "Inserisci un URL valido (es. https://...)")
         String videoUrl
-
-) {
-};
+) {}
