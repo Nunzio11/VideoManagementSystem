@@ -3,10 +3,9 @@ let selectedPlaylistId = null;
 checkLogin();
 loadPlaylists();
 
-
 function validatePlaylist(playlist) {
     if (playlist.title.trim().length === 0 || playlist.category.trim().length === 0) {
-        alert("I campi non possono contenere solo spazi vuoti");
+        showError("I campi non possono contenere solo spazi vuoti");
         return false;
     }
 
@@ -14,29 +13,27 @@ function validatePlaylist(playlist) {
     const validPattern = /^[a-zA-ZàèìòùÀÈÌÒÙáéíóúÁÉÍÓÚ ]+$/;
 
     if(!validPattern.test(playlist.title)) {
-       alert("Il titolo può contenere solo lettere e spazi");
+       showError("Il titolo può contenere solo lettere e spazi");
        return false;
     }
 
     if(!validPattern.test(playlist.category)) {
-       alert("La categoria può contenere solo lettere e spazi");
+       showError("La categoria può contenere solo lettere e spazi");
        return false;
     }
 
-
     if (playlist.title.trim().length < 6 || playlist.title.trim().length > 50) {
-        alert("Il titolo deve contenere tra i 6 e i 50 caratteri");
+        showError("Il titolo deve contenere tra i 6 e i 50 caratteri");
         return false;
     }
 
     if (playlist.category.trim().length < 3 || playlist.category.trim().length > 50) {
-        alert("La categoria deve contenere tra i 3 e i 50 caratteri");
+        showError("La categoria deve contenere tra i 3 e i 50 caratteri");
         return false;
     }
 
     return true;
 }
-
 
 async function loadPlaylists() {
     try {
@@ -84,7 +81,6 @@ async function loadPlaylists() {
     }
 }
 
-
 async function savePlaylist() {
     const playlist = {
         title: document.getElementById("title").value,
@@ -97,7 +93,6 @@ async function savePlaylist() {
     }
 
     try {
-
         playlist.title = playlist.title.trim();
         playlist.category = playlist.category.trim();
 
@@ -149,15 +144,25 @@ async function saveUpdate() {
 }
 
 async function deletePlaylist(id) {
-    if (!confirm("Eliminare la playlist?"))
-        return;
+    const result = await Swal.fire({
+        title: 'Sei sicuro?',
+        text: "Rimuoverai anche tutti i video all'interno!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sì, eliminala!',
+        cancelButtonText: 'Annulla'
+    });
 
-    try {
-        await deletePlaylistService(id);
-        showSuccess("Playlist eliminata");
-        loadPlaylists();
-    } catch (error) {
-        showError(error.message);
+    if (result.isConfirmed) {
+        try {
+            await deletePlaylistService(id);
+            showSuccess("Playlist eliminata");
+            loadPlaylists();
+        } catch (error) {
+            showError(error.message);
+        }
     }
 }
 
@@ -165,13 +170,25 @@ function showVideos(id) {
     window.location.href = "videos.html?playlistId=" + id;
 }
 
-
 function showSuccess(message) {
-    alert(message);
+    Swal.fire({
+        icon: 'success',
+        title: message,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
 }
 
 function showError(message) {
-    alert(message);
+    Swal.fire({
+        icon: 'error',
+        title: 'Ops...',
+        text: message,
+        confirmButtonColor: '#0d6efd'
+    });
 }
 
 function openModal(id) {
