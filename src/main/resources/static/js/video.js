@@ -13,6 +13,50 @@ async function initPage() {
     await loadVideos();
 }
 
+
+function validateVideo(video) {
+    if (!video.title || video.title.trim().length === 0) {
+        showError("Il titolo del video non può essere vuoto");
+        return false;
+    }
+
+    // BLOCCA NUMERI E CARATT. SPECIALI
+    const validPattern = /^[a-zA-ZàèìòùÀÈÌÒÙáéíóúÁÉÍÓÚ ]+$/;
+    if (!validPattern.test(video.title)) {
+        showError("Il titolo del video può contenere solo lettere e spazi");
+        return false;
+    }
+
+    if (video.title.trim().length < 7 || video.title.trim().length > 255) {
+        showError("Il titolo deve contenere tra i 7 e i 255 caratteri");
+        return false;
+    }
+
+    if (isNaN(video.durationMinutes) || video.durationMinutes < 1) {
+        showError("La durata deve essere almeno di 1 minuto");
+        return false;
+    }
+
+    if (video.durationMinutes > 240) {
+        showError("La durata non può superare le 4 ore (240 minuti)");
+        return false;
+    }
+
+    const validLevels = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
+    if (!validLevels.includes(video.level)) {
+        showError("Il livello selezionato non è valido!");
+        return false;
+    }
+
+    // CONTROLLO PER URL VUOTO
+    if (!video.videoUrl || video.videoUrl.trim().length === 0) {
+        showError("L'URL del video o il File Path non può essere vuoto");
+        return false;
+    }
+
+    return true;
+}
+
 async function loadPlaylist() {
     try {
         const playlist = await getPlaylist(playlistId);
@@ -77,7 +121,6 @@ async function loadVideos() {
     }
 }
 
-
 function convertToYouTubeEmbed(url) {
     if (!url) return "";
 
@@ -97,7 +140,6 @@ function convertToYouTubeEmbed(url) {
 
     return url;
 }
-
 
 async function playVideo(id) {
     try {
@@ -143,7 +185,12 @@ async function saveVideo() {
         username: loggedUser
     };
 
+    if (!validateVideo(video)) {
+        return;
+    }
+
     try {
+        video.title = video.title.trim();
         await createVideo(playlistId, video, loggedUser);
 
         showSuccess("Video creato con successo");
@@ -177,8 +224,14 @@ async function saveVideoUpdate() {
         username: sessionStorage.getItem("loggedUser")
     };
 
+    if (!validateVideo(video)) {
+       return;
+    }
+
     try {
+        video.title = video.title.trim();
         await updateVideoService(selectedVideoId, video);
+
         showSuccess("Video aggiornato");
         closeModal("updateVideoModal");
         loadVideos();
@@ -188,15 +241,50 @@ async function saveVideoUpdate() {
     }
 }
 
-async function deleteVideo(id) {
-    if (!confirm("Vuoi eliminare questo video?"))
-        return;
 
-    try {
-        await deleteVideoService(id);
-        showSuccess("Video eliminato");
-        loadVideos();
-    } catch (error) {
-        showError(error.message);
+// ELIMINAZIONE VIDEO CON POPUP MODERNO
+async function deleteVideo(id) {
+    const result = await Swal.fire({
+        title: 'Sei sicuro?',
+        text: "Non potrai recuperare questo video!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sì, eliminalo!',
+        cancelButtonText: 'Annulla'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            await deleteVideoService(id);
+            showSuccess("Video eliminato con successo");
+            loadVideos();
+        } catch (error) {
+            showError(error.message);
+        }
     }
+}
+
+
+// INTERFACCIA GRAFICA
+function showError(message) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Ops...',
+        text: message,
+        confirmButtonColor: '#0d6efd'
+    });
+}
+
+function showSuccess(message) {
+    Swal.fire({
+        icon: 'success',
+        title: message,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
 }
