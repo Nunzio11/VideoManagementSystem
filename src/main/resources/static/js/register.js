@@ -6,47 +6,47 @@ async function register() {
     const confirmPassword = document.getElementById("confirmPassword").value;
 
     if (firstName.trim() === "") {
-        alert("Inserisci il nome");
+        showError("Inserisci il nome");
         return;
     }
 
     if (lastName.trim() === "") {
-        alert("Inserisci il cognome");
+        showError("Inserisci il cognome");
         return;
     }
 
     if (username.trim() === "") {
-        alert("Inserisci lo username");
+        showError("Inserisci lo username");
         return;
     }
 
     if (username.length < 4 || username.length > 20) {
-        alert("Lo username deve contenere tra 4 e 20 caratteri");
+        showError("Lo username deve contenere tra 4 e 20 caratteri");
         return;
     }
 
     if (!/^[a-zA-Z0-9._-]+$/.test(username)) {
-        alert("Lo username contiene caratteri non consentiti");
+        showError("Lo username contiene caratteri non consentiti");
         return;
     }
 
     if (password.trim() === "") {
-        alert("Inserisci la password");
+        showError("Inserisci la password");
         return;
     }
 
     if (password.length < 8) {
-        alert("La password deve contenere almeno 8 caratteri");
+        showError("La password deve contenere almeno 8 caratteri");
         return;
     }
 
     if (!/[A-Z]/.test(password)) {
-        alert("La password deve contenere almeno una lettera maiuscola");
+        showError("La password deve contenere almeno una lettera maiuscola");
         return;
     }
 
     if (password !== confirmPassword) {
-        alert("Le password non coincidono");
+        showError("Le password non coincidono");
         return;
     }
 
@@ -70,19 +70,41 @@ async function register() {
         );
 
         if (response.ok) {
-            alert("Registrazione completata!");
-            window.location.href = "login.html";
+            showSuccess("Registrazione completata!");
+            window.setTimeout(() => {
+                window.location.href = "login.html";
+            }, 2000);
         } else {
             const errorText = await response.text();
-
             if (errorText) {
-                alert(errorText);
+                showError(errorText);
             } else {
-                alert("Errore durante la registrazione");
+                showError("Errore durante la registrazione");
             }
         }
     } catch (error) {
         console.error(error);
-        alert("Impossibile contattare il server");
+        showError("Impossibile contattare il server");
     }
+}
+
+function showError(message) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Ops...',
+        text: message,
+        confirmButtonColor: '#0d6efd'
+    });
+}
+
+function showSuccess(message) {
+    Swal.fire({
+        icon: 'success',
+        title: message,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1000,
+        timerProgressBar: true
+    });
 }
