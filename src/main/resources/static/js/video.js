@@ -5,6 +5,7 @@ const playlistId = params.get("playlistId");
 
 let selectedVideoId = null;
 let isPlaylistOwner = false;
+let currentlyPlayingId = null;
 
 initPage();
 
@@ -12,7 +13,6 @@ async function initPage() {
     await loadPlaylist();
     await loadVideos();
 }
-
 
 function validateVideo(video) {
     if (!video.title || video.title.trim().length === 0) {
@@ -48,7 +48,6 @@ function validateVideo(video) {
         return false;
     }
 
-    // CONTROLLO PER URL VUOTO
     if (!video.videoUrl || video.videoUrl.trim().length === 0) {
         showError("L'URL del video o il File Path non può essere vuoto");
         return false;
@@ -145,6 +144,9 @@ async function playVideo(id) {
     try {
         const video = await getVideo(id);
 
+
+        currentlyPlayingId = id;
+
         const container = document.getElementById("video-player-container");
         const player = document.getElementById("main-video-player");
         const titleElement = document.getElementById("player-video-title");
@@ -169,19 +171,28 @@ async function playVideo(id) {
 }
 
 async function saveVideo() {
-   if(!isPlaylistOwner) {
-      showError("Azione non consentita: Non sei il proprietario di questa playlist!");
-      closeModal("insertVideoModal");
-      return;
-   }
+    if(!isPlaylistOwner) {
+        showError("Azione non consentita: Non sei il proprietario di questa playlist!");
+        closeModal("insertVideoModal");
+        return;
+    }
+
+    const titleInput = document.getElementById("video-title").value;
+    const durationInput = document.getElementById("video-duration").value;
+    const urlInput = document.getElementById("video-url").value;
+
+    if (titleInput.trim() === "" || durationInput.trim() === "" || urlInput.trim() === "") {
+        showError("Tutti i campi obbligatori devono essere compilati");
+        return;
+    }
 
     const loggedUser = sessionStorage.getItem("loggedUser");
 
     const video = {
-        title: document.getElementById("video-title").value,
-        durationMinutes: parseInt(document.getElementById("video-duration").value),
+        title: titleInput,
+        durationMinutes: parseInt(durationInput),
         level: document.getElementById("video-level").value,
-        videoUrl: document.getElementById("video-url").value,
+        videoUrl: urlInput,
         username: loggedUser
     };
 
@@ -191,6 +202,8 @@ async function saveVideo() {
 
     try {
         video.title = video.title.trim();
+        video.videoUrl = video.videoUrl.trim();
+
         await createVideo(playlistId, video, loggedUser);
 
         showSuccess("Video creato con successo");
@@ -216,11 +229,20 @@ async function editVideo(id) {
 }
 
 async function saveVideoUpdate() {
+    const titleInput = document.getElementById("upd-video-title").value;
+    const durationInput = document.getElementById("upd-video-duration").value;
+    const urlInput = document.getElementById("upd-video-url").value;
+
+    if (titleInput.trim() === "" || durationInput.trim() === "" || urlInput.trim() === "") {
+        showError("Tutti i campi obbligatori devono essere compilati");
+        return;
+    }
+
     const video = {
-        title: document.getElementById("upd-video-title").value,
-        durationMinutes: parseInt(document.getElementById("upd-video-duration").value),
+        title: titleInput,
+        durationMinutes: parseInt(durationInput),
         level: document.getElementById("upd-video-level").value,
-        videoUrl: document.getElementById("upd-video-url").value,
+        videoUrl: urlInput,
         username: sessionStorage.getItem("loggedUser")
     };
 
@@ -230,6 +252,8 @@ async function saveVideoUpdate() {
 
     try {
         video.title = video.title.trim();
+        video.videoUrl = video.videoUrl.trim();
+
         await updateVideoService(selectedVideoId, video);
 
         showSuccess("Video aggiornato");
@@ -241,8 +265,6 @@ async function saveVideoUpdate() {
     }
 }
 
-
-// ELIMINAZIONE VIDEO CON POPUP MODERNO
 async function deleteVideo(id) {
     const result = await Swal.fire({
         title: 'Sei sicuro?',
@@ -251,7 +273,7 @@ async function deleteVideo(id) {
         showCancelButton: true,
         confirmButtonColor: '#dc3545',
         cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sì, eliminalo!',
+        confirmButtonText: 'Sì, eliminala!',
         cancelButtonText: 'Annulla'
     });
 
@@ -259,32 +281,23 @@ async function deleteVideo(id) {
         try {
             await deleteVideoService(id);
             showSuccess("Video eliminato con successo");
+
+
+            if (id === currentlyPlayingId) {
+                const container = document.getElementById("video-player-container");
+                const player = document.getElementById("main-video-player");
+                const currentVideoTxt = document.getElementById("player-current-video");
+
+                if (container) container.classList.add("d-none");
+                if (player) player.src = "";
+                if (currentVideoTxt) currentVideoTxt.innerText = "";
+
+                currentlyPlayingId = null; // Reset dello stato
+            }
+
             loadVideos();
         } catch (error) {
             showError(error.message);
         }
     }
-}
-
-
-// INTERFACCIA GRAFICA
-function showError(message) {
-    Swal.fire({
-        icon: 'error',
-        title: 'Ops...',
-        text: message,
-        confirmButtonColor: '#0d6efd'
-    });
-}
-
-function showSuccess(message) {
-    Swal.fire({
-        icon: 'success',
-        title: message,
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true
-    });
 }
