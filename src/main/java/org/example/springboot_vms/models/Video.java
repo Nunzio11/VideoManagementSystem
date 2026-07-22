@@ -8,7 +8,7 @@ public class Video {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "videoID")
+    @Column(name = "videoid")
     private Long id;
 
     @Column(name = "title", nullable = false, length = 255)
@@ -21,7 +21,7 @@ public class Video {
     private String level;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "playlistRIF", nullable = false)
+    @JoinColumn(name = "playlistrif", nullable = false)
     private Playlist playlist;
 
     @Column(name = "video_url", nullable = false)
